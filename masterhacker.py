@@ -10,6 +10,7 @@ import random
 import shutil
 import sys
 import time
+from typing import Dict, List, Optional, Set, Tuple, Union, Any
 
 # Optional imports for Unix-like systems (for Unicode width probing)
 try:
@@ -364,10 +365,10 @@ UNICODE_ACCESS_GRANTED = STANDARD_UNICODE_ACCESS_GRANTED
 UNICODE_WARNING_BOX = STANDARD_UNICODE_WARNING_BOX
 
 # Global Unicode mode setting and width system
-unicode_mode = "auto"
-width_mode = "auto"  # Width detection mode: auto, compact, standard, wide
+unicode_mode: str = "auto"
+width_mode: str = "auto"  # Width detection mode: auto, compact, standard, wide
 
-def utf8_env_check():
+def utf8_env_check() -> bool:
     """Check if environment variables suggest UTF-8 support"""
     for var in ("LC_ALL", "LC_CTYPE", "LANG"):
         val = os.environ.get(var, "")
@@ -375,13 +376,13 @@ def utf8_env_check():
             return True
     return False
 
-def terminal_hints_unicode():
+def terminal_hints_unicode() -> bool:
     """Check if TERM variable suggests Unicode capability"""
     term = os.environ.get("TERM", "").lower()
     unicode_terms = ("xterm-256color", "screen-256color", "tmux-256color")
     return any(term.startswith(t) for t in unicode_terms)
 
-def probe_unicode_width():
+def probe_unicode_width() -> bool:
     """
     Safe probe to test if Unicode renders with expected width.
     Returns True if Unicode appears safe to use.
@@ -443,7 +444,7 @@ def probe_unicode_width():
         except (OSError, ValueError):
             pass
 
-def should_use_unicode():
+def should_use_unicode() -> bool:
     """Determine if Unicode should be used based on current mode and environment"""
     global unicode_mode
     
@@ -457,7 +458,7 @@ def should_use_unicode():
         return (utf8_env_check() and terminal_hints_unicode())
     return False
 
-def get_banner():
+def get_banner() -> str:
     """Get appropriate banner based on Unicode mode and terminal width"""
     width_tier = get_width_mode()
     
@@ -476,7 +477,7 @@ def get_banner():
         else:  # standard
             return STANDARD_ASCII_BANNER
 
-def get_access_granted():
+def get_access_granted() -> str:
     """Get appropriate access granted box based on Unicode mode and terminal width"""
     width_tier = get_width_mode()
     
@@ -495,7 +496,7 @@ def get_access_granted():
         else:  # standard
             return STANDARD_ACCESS_GRANTED
 
-def get_warning_box():
+def get_warning_box() -> str:
     """Get appropriate warning box based on Unicode mode and terminal width"""
     width_tier = get_width_mode()
     
@@ -514,7 +515,7 @@ def get_warning_box():
         else:  # standard
             return STANDARD_WARNING_BOX
 
-def get_progress_chars():
+def get_progress_chars() -> Dict[str, str]:
     """Get appropriate progress bar characters based on Unicode mode"""
     if should_use_unicode():
         return {'filled': '█', 'empty': '░'}
@@ -522,7 +523,7 @@ def get_progress_chars():
         return {'filled': '#', 'empty': '.'}
 
 
-def get_terminal_width():
+def get_terminal_width() -> int:
     """
     Get terminal width with comprehensive fallback chain.
     
@@ -555,7 +556,7 @@ def get_terminal_width():
     return 80
 
 
-def classify_width(width):
+def classify_width(width: int) -> str:
     """Classify terminal width into compact, standard, or wide tiers
     
     Args:
@@ -572,7 +573,7 @@ def classify_width(width):
         return 'wide'
 
 
-def get_terminal_width_tier():
+def get_terminal_width_tier() -> str:
     """
     Get terminal width tier with edge case handling.
     
@@ -589,7 +590,7 @@ def get_terminal_width_tier():
     return classify_width(width)
 
 
-def get_width_mode():
+def get_width_mode() -> str:
     """Determine current width mode based on settings and terminal"""
     global width_mode
     
@@ -604,7 +605,7 @@ def get_width_mode():
         return 'standard'
 
 
-def progress(label="Processing", steps=20, delay=0.08):
+def progress(label: str = "Processing", steps: int = 20, delay: float = 0.08) -> None:
     """Enhanced progress bar with cinematic styling"""
     print(f"\n[{label.upper()}]")
     print("+" + "-" * 52 + "+")
@@ -627,34 +628,34 @@ def progress(label="Processing", steps=20, delay=0.08):
     time.sleep(0.2)
 
 
-def show_access_granted():
+def show_access_granted() -> None:
     """Display ACCESS GRANTED box"""
     print(get_access_granted())
     time.sleep(1)
 
 
-def show_warning():
+def show_warning() -> None:
     """Display WARNING box"""
     print(get_warning_box())
     time.sleep(1.5)
 
 
-def ascii_banner():
+def ascii_banner() -> None:
     """Display the art banner (ASCII or Unicode based on mode)"""
     print(get_banner())
 
 
 
 
-def random_line(options):
+def random_line(options: List[str]) -> str:
     """Return a random line from options list"""
     return random.choice(options)
 
 
 # Global state for discovered targets
-discovered_targets = []
-infiltrated_targets = set()
-system_status = {
+discovered_targets: List[Tuple[str, str]] = []
+infiltrated_targets: Set[str] = set()
+system_status: Dict[str, Any] = {
     "online": True,
     "security_level": "MAXIMUM", 
     "connections": 3,
@@ -665,7 +666,7 @@ system_status = {
 }
 
 
-def cmd_help():
+def cmd_help() -> None:
     """Display available commands"""
     help_text = """Available commands:
   help                    - Show this help
@@ -681,7 +682,7 @@ def cmd_help():
     print(help_text)
 
 
-def cmd_scan():
+def cmd_scan() -> None:
     """Scan for available targets"""
     global discovered_targets
     
@@ -699,7 +700,7 @@ def cmd_scan():
         print(f"- {name} (security: {security})")
 
 
-def cmd_decrypt():
+def cmd_decrypt() -> None:
     """Decrypt intercepted data"""
     progress("Decrypting data", 26, 0.10)
     
@@ -716,7 +717,7 @@ def cmd_decrypt():
     print(f'Decrypted message: "{message}"')
 
 
-def cmd_infiltrate(target):
+def cmd_infiltrate(target: Optional[str]) -> None:
     """Infiltrate specified target"""
     if not target:
         print("Target required. Usage: infiltrate <target>")
@@ -739,7 +740,7 @@ def cmd_infiltrate(target):
     print("Root privileges obtained.")
 
 
-def cmd_hack():
+def cmd_hack() -> None:
     """Execute hack sequence"""
     show_warning()
     print("Initiating hack sequence...")
@@ -758,7 +759,7 @@ def cmd_hack():
     print(f"Credits earned: {credits}")
 
 
-def cmd_trace(target):
+def cmd_trace(target: Optional[str]) -> None:
     """Trace target location"""
     if not target:
         print("Target required. Usage: trace <target>")
@@ -792,7 +793,7 @@ def cmd_trace(target):
         print(f"ISP: {random_line(isps)}")
 
 
-def cmd_countertrace():
+def cmd_countertrace() -> None:
     """Deploy countermeasures against traces"""
     print("Deploying countermeasures...")
     progress("Scrambling identity", 22, 0.11)
@@ -800,7 +801,7 @@ def cmd_countertrace():
     print("Trace blocked. Identity scrambled.")
 
 
-def cmd_status():
+def cmd_status() -> None:
     """Show system status"""
     status_map = {
         True: "ENABLED",
@@ -814,19 +815,19 @@ def cmd_status():
     print(f"Stealth Mode: {'ON' if system_status['stealth'] else 'OFF'}")
 
 
-def cmd_clear():
+def cmd_clear() -> None:
     """Clear the terminal screen"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def cmd_exit():
+def cmd_exit() -> None:
     """Exit the terminal"""
     print("Connection terminated.")
     print("Stay anonymous, hacker.")
     sys.exit(0)
 
 
-def parse_command(command_line):
+def parse_command(command_line: str) -> Tuple[Optional[str], List[str]]:
     """Parse command line and return command and arguments"""
     parts = command_line.strip().split()
     if not parts:
@@ -834,9 +835,11 @@ def parse_command(command_line):
     return parts[0].lower(), parts[1:]
 
 
-def execute_command(cmd, args):
+def execute_command(cmd: Optional[str], args: List[str]) -> bool:
     """Execute a command with given arguments. Returns True if command was valid, False otherwise"""
-    if cmd == "help":
+    if cmd is None:
+        return False
+    elif cmd == "help":
         cmd_help()
     elif cmd == "scan":
         cmd_scan()
@@ -864,7 +867,7 @@ def execute_command(cmd, args):
     return True
 
 
-def run_demo_script():
+def run_demo_script() -> None:
     """Run the deterministic demo script"""
     # Set deterministic seed
     random.seed(1337)
@@ -888,7 +891,7 @@ def run_demo_script():
         execute_command(cmd, args)
 
 
-def interactive_mode():
+def interactive_mode() -> None:
     """Run interactive terminal mode with robust error handling"""
     ascii_banner()
     
@@ -910,7 +913,7 @@ def interactive_mode():
         cmd_exit()
 
 
-def main():
+def main() -> None:
     """Main entry point"""
     global unicode_mode, width_mode
     
