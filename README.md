@@ -1,5 +1,7 @@
 # Master Hacker Terminal
 
+**If you want to help me out you can [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I5ZJUA3)**
+
 A tongue-in-cheek, movie-hacker terminal simulator that parodies Hollywood's over-the-top hacking scenes.
 
 ## Requirements
