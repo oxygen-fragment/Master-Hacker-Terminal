@@ -7,6 +7,7 @@ A parody hacker movie terminal simulator
 import argparse
 import os
 import random
+import shutil
 import sys
 import time
 
@@ -20,118 +21,351 @@ except ImportError:
     HAS_UNIX_TTY = False
 
 
-# ASCII Art Constants  
-ASCII_BANNER = """
- +============================================================+
- |                                                            |
- |  **   **   ***     ****  **  **  ******  *****            |
- |  **   **  ** **   **     ** **   **      **   **          |
- |  *******  *****   **     ****    ****    ******           |
- |  **   **  **  **  **     ** **   **      **  **           |
- |  **   **  **   **  ****  **  **  ******  **   **          |
- |                                                            |
- |  ********  ******  ******  **   **  ****  **   **   ***   |
- |     **     **      **   ** *** ***   **   ***  **  ** **  |
- |     **     ****    ******  *******   **   **** **  *****  |
- |     **     **      **  **  ** * **   **   ** ****  **  ** |
- |     **     ******  **   ** **   **  ****  **  ***  **   **|
- |                                                            |
- |                       [ VERSION 2.0.7 ]                   |
- |                 *** CLASSIFIED ACCESS ONLY ***            |
- +============================================================+
-"""
-
-ACCESS_GRANTED = """
- +===========================================================+
- |                                                           |
- |      ***     ****   ****  ****** *****  *****            |
- |     ** **   **  ** **  ** **     **     **               |
- |    **   **  **     **     ****   *****  *****            |
- |    *******  **  ** **  ** **         ** **               |
- |    **   **   ****   ****  ****** *****  *****            |
- |                                                           |
- |       *****  ******   ***   **   ** ******  ******  **** |
- |      **      **   ** ** **  ***  **   **    **     ** ** |
- |      **  *** ******  *****  **** **   **    ****   **  **|
- |      **   ** **  **  **  ** ** ****   **    **     ** ** |
- |       *****  **   ** **   ** **  ***   **    ******  **** |
- |                                                           |
- |                  *** ACCESS GRANTED ***                   |
- +===========================================================+
-"""
-
-WARNING_BOX = """
+# ASCII Art Constants - Width-Tiered System
+# Compact Mode: ≤62 characters
+COMPACT_ASCII_BANNER = """
  +==========================================================+
  |                                                          |
- |    **   **  ***    ******  **   ** **** **   **  *****  |
- |    **   ** ** **   **   ** ***  **  **  ***  ** **      |
- |    ** * ** *****   ******  **** **  **  **** ** ** ***  |
- |    ******* **  **  **  **  ** ****  **  ** **** **   ** |
- |    ***  ** **   ** **   ** **  ***  **  **  ***  *****  |
+ |   ██   ██  ████   ████  █  █  ████  ████                |
+ |   ██   ██ ██  ██ ██  ██ ████  ██    ██  █               |
+ |   ███████ ██████ ██     ██ █  ████  ████                |
+ |   ██   ██ ██  ██ ██  ██ ████  ██    ██ █                |
+ |   ██   ██ ██  ██  ████  █  █  ████  █  █                |
  |                                                          |
- |                     !!! WARNING !!!                     |
- |              UNAUTHORIZED ACCESS DETECTED                |
- |            INITIATING SECURITY PROTOCOLS                 |
+ |   ██████  ████  ████  █   █ ████ █  █ ████ █            |
+ |      ██   ██    ██  █ ██ ██  ██  ██ █ ██  ██            |
+ |      ██   ████  ████  █████  ██  ████ ████ █            |
+ |      ██   ██    ██ █  ██ ██  ██  █ ██ ██ █ █            |
+ |      ██   ████  █  █  █   █ ████ █  █ █  █ ████         |
+ |                                                          |
+ |                   [ VERSION 2.0.7 ]                     |
+ |             *** CLASSIFIED ACCESS ONLY ***              |
  +==========================================================+
 """
 
-# Unicode Art Constants (Enhanced versions)
-UNICODE_BANNER = """
- ╔════════════════════════════════════════════════════════╗
- ║                                                        ║
- ║  ██   ██   ███     ████  ██  ██  ██████  █████        ║
- ║  ██   ██  ██ ██   ██     ██ ██   ██      ██   ██      ║
- ║  ███████  █████   ██     ████    ████    ██████       ║
- ║  ██   ██  ██  ██  ██     ██ ██   ██      ██  ██       ║
- ║  ██   ██  ██   ██  ████  ██  ██  ██████  ██   ██      ║
- ║                                                        ║
- ║  ████████  ██████  ██████  ██   ██  ████  ██   ██  ███ ║
- ║     ██     ██      ██   ██ ███ ███   ██   ███  ██  ██  ║
- ║     ██     ████    ██████  ███████   ██   ████ ██  ███ ║
- ║     ██     ██      ██  ██  ██ █ ██   ██   ██ ████  ██  ║
- ║     ██     ██████  ██   ██ ██   ██  ████  ██  ███  ██  ║
- ║                                                        ║
- ║                       [ VERSION 2.0.7 ]               ║
- ║                 *** CLASSIFIED ACCESS ONLY ***        ║
- ╚════════════════════════════════════════════════════════╝
+COMPACT_ACCESS_GRANTED = """
+ +========================================================+
+ |                                                        |
+ |    ████   ████  ████  ████  ████  ████                |
+ |   ██  ██ ██  ██ ██  ██ ██    ██    ██                 |
+ |   ██████ ██     ██     ████  ████  ████               |
+ |   ██  ██ ██  ██ ██  ██ ██       ██ ██                 |
+ |   ██  ██  ████   ████  ████  ████  ████               |
+ |                                                        |
+ |    ████  ████   ████  █  █ ████  ████  ████           |
+ |   ██     ██  █ ██  ██ ██ █  ██   ██     ██  █         |
+ |   ██ ███ ████  ██████ ████  ██   ████   ██  █         |
+ |   ██  ██ ██ █  ██  ██ █ ██  ██   ██     ██  █         |
+ |    ████  █  █  ██  ██ █  █  ██   ████   ████          |
+ |                                                        |
+ |                *** ACCESS GRANTED ***                  |
+ +========================================================+
 """
 
-UNICODE_ACCESS_GRANTED = """
- ╔═══════════════════════════════════════════════════════╗
- ║                                                       ║
- ║      ███     ████   ████  ██████ █████  █████        ║
- ║     ██ ██   ██  ██ ██  ██ ██     ██     ██           ║
- ║    ██   ██  ██     ██     ████   █████  █████        ║
- ║    ███████  ██  ██ ██  ██ ██         ██ ██           ║
- ║    ██   ██   ████   ████  ██████ █████  █████        ║
- ║                                                       ║
- ║       █████  ██████   ███   ██   ██ ██████  ██████   ║
- ║      ██      ██   ██ ██ ██  ███  ██   ██    ██       ║
- ║      ██  ███ ██████  █████  ████ ██   ██    ████     ║
- ║      ██   ██ ██  ██  ██  ██ ██ ████   ██    ██       ║
- ║       █████  ██   ██ ██   ██ ██  ███   ██    ██████  ║
- ║                                                       ║
- ║                  *** ACCESS GRANTED ***               ║
- ╚═══════════════════════════════════════════════════════╝
+COMPACT_WARNING_BOX = """
+ +=======================================================+
+ |                                                       |
+ |   █   █  ████  ████  █  █ ████ █  █  ████           |
+ |   █   █ ██  ██ ██  █ ██ █  ██  ██ █ ██              |
+ |   █ █ █ ██████ ████  ████  ██  ████ ██ ██           |
+ |   █████ ██  ██ ██ █  █ ██  ██  █ ██ ██  █           |
+ |   ██ ██ ██  ██ █  █  █  █ ████ █  █  ████           |
+ |                                                       |
+ |                   !!! WARNING !!!                    |
+ |            UNAUTHORIZED ACCESS DETECTED              |
+ |          INITIATING SECURITY PROTOCOLS               |
+ +=======================================================+
 """
 
-UNICODE_WARNING_BOX = """
+# Standard Mode: 63-99 characters  
+STANDARD_ASCII_BANNER = """
+ +============================================================================+
+ |                                                                            |
+ |  ██   ██   ████   ██████  ██  ██  ████████  ██████                        |
+ |  ██   ██  ██  ██  ██      ██ ██   ██        ██   ██                       |
+ |  ███████  ██████  ██      ████    ████      ██████                        |
+ |  ██   ██  ██  ██  ██      ██ ██   ██        ██  ██                        |
+ |  ██   ██  ██  ██  ██████  ██  ██  ████████  ██   ██                       |
+ |                                                                            |
+ |  ████████  ████████  ██████  ██   ██  ██████  ██   ██   ████   ██         |
+ |     ██     ██        ██   ██ ███ ███   ██    ███  ██  ██  ██  ██          |
+ |     ██     ████      ██████  ███████   ██    ████ ██  ██████  ██          |
+ |     ██     ██        ██  ██  ██ █ ██   ██    ██ ████  ██  ██  ██          |
+ |     ██     ████████  ██   ██ ██   ██  ██████ ██  ███  ██   ██ ██████      |
+ |                                                                            |
+ |                           [ VERSION 2.0.7 ]                               |
+ |                     *** CLASSIFIED ACCESS ONLY ***                        |
+ +============================================================================+
+"""
+
+STANDARD_ACCESS_GRANTED = """
+ +=========================================================================+
+ |                                                                         |
+ |      ██████   ██████  ██████  ████████ ████████ ████████              |
+ |     ██  ██   ██  ██  ██  ██  ██       ██       ██                     |
+ |    ██   ██  ██      ██      ████     ████████ ████████                |
+ |    ███████  ██  ██  ██  ██  ██           ██   ██                      |
+ |    ██   ██   ██████  ██████  ████████ ████████ ████████               |
+ |                                                                         |
+ |       ████████ ██████    ████   ██   ██ ████████ ████████  ████        |
+ |      ██       ██   ██  ██  ██  ███  ██    ██    ██       ██  ██       |
+ |      ██  ████ ██████   ██████  ████ ██    ██    ████     ██  ██       |
+ |      ██   ██  ██  ██   ██  ██  ██ ████    ██    ██       ██  ██       |
+ |       ███████ ██   ██  ██   ██ ██  ███    ██    ████████  ████        |
+ |                                                                         |
+ |                        *** ACCESS GRANTED ***                          |
+ +=========================================================================+
+"""
+
+STANDARD_WARNING_BOX = """
+ +========================================================================+
+ |                                                                        |
+ |    ██   ██   ████   ██████  ██   ██ ████ ██   ██  ████████           |
+ |    ██   ██  ██  ██  ██   ██ ███  ██  ██  ███  ██ ██                  |
+ |    ██ █ ██  ██████  ██████  ████ ██  ██  ████ ██ ██  ████            |
+ |    ███████  ██  ██  ██  ██  ██ ████  ██  ██ ████ ██   ██             |
+ |    ███  ██  ██  ██  ██   ██ ██  ███ ████ ██  ███  ███████            |
+ |                                                                        |
+ |                           !!! WARNING !!!                             |
+ |                    UNAUTHORIZED ACCESS DETECTED                       |
+ |                  INITIATING SECURITY PROTOCOLS                        |
+ +========================================================================+
+"""
+
+# Wide Mode: ≥100 characters
+WIDE_ASCII_BANNER = """
+ +==================================================================================================+
+ |                                                                                                  |
+ |  ██   ██   ████████   ██████████  ██    ██  ████████████  ██████████                           |
+ |  ██   ██  ██    ██   ██      ██  ██  ██     ██        ██  ██   ██                              |
+ |  ██████   ████████   ██        ██ ████      ██████████    ██████                               |
+ |  ██   ██  ██    ██   ██      ██  ██  ██     ██            ██  ██                               |
+ |  ██   ██  ██    ██    ██████████  ██    ██  ████████████  ██   ██                              |
+ |                                                                                                  |
+ |  ████████████  ████████████  ██████████  ██   ██   ██  ██████████  ██   ██   ████████   ██     |
+ |       ██       ██            ██       ██ ███ ███ ███     ██      ███  ██   ██    ██    ██     |
+ |       ██       ██████████    ██████████  ██████████      ██      ████ ██   ████████    ██     |
+ |       ██       ██            ██     ██   ██  █  ██       ██      ██ ████   ██    ██    ██     |
+ |       ██       ████████████  ██      ██  ██     ██     ████████  ██   ███  ██     ██ ████████ |
+ |                                                                                                  |
+ |                                     [ VERSION 2.0.7 ]                                          |
+ |                               *** CLASSIFIED ACCESS ONLY ***                                    |
+ +==================================================================================================+
+"""
+
+WIDE_ACCESS_GRANTED = """
+ +===============================================================================================+
+ |                                                                                               |
+ |      ████████████   ██████████  ██████████  ████████████ ████████████ ████████████         |
+ |     ██      ██     ██    ██    ██    ██    ██           ██           ██                     |
+ |    ██       ██    ██        ██ ██        ██ ██████████   ████████████ ████████████         |
+ |    ████████████   ██    ██    ██    ██    ██           ██            ██                    |
+ |    ██       ██     ██████████  ██████████  ████████████ ████████████  ████████████         |
+ |                                                                                               |
+ |       ██████████  ██████████    ████████   ██     ██   ██ ████████████ ████████████  ██████ |
+ |      ██          ██       ██  ██    ██   ███    ██  ██    ██      ██         ██      ██  ██ |
+ |      ██   ██████ ██████████   ████████    ████   ██ ██    ██      ██         ██      ██  ██ |
+ |      ██        ██ ██     ██    ██    ██   ██ ██  ████     ██      ██         ██      ██  ██ |
+ |       ██████████ ██      ██   ██     ██  ██   ██ ███      ██      ██    ████████████ ██████ |
+ |                                                                                               |
+ |                                  *** ACCESS GRANTED ***                                      |
+ +===============================================================================================+
+"""
+
+WIDE_WARNING_BOX = """
+ +============================================================================================+
+ |                                                                                            |
+ |    ██     ██   ████████   ██████████  ██     ██ ████████ ██     ██  ██████████          |
+ |    ██     ██  ██    ██   ██       ██  ██   ██    ██      ██   ██  ██                    |
+ |    ██  █  ██  ████████   ██████████   ██ ██      ██      ██ ██    ██  ██████            |
+ |    ████████   ██    ██   ██     ██    ████       ██      ████     ██       ██           |
+ |    ███   ██   ██    ██   ██      ██   ██  ██   ████████  ██  ██    ████████████         |
+ |                                                                                            |
+ |                                    !!! WARNING !!!                                        |
+ |                          UNAUTHORIZED ACCESS DETECTED                                     |
+ |                        INITIATING SECURITY PROTOCOLS                                      |
+ +============================================================================================+
+"""
+
+# Default ASCII constants (keeping for backward compatibility)
+ASCII_BANNER = STANDARD_ASCII_BANNER
+ACCESS_GRANTED = STANDARD_ACCESS_GRANTED  
+WARNING_BOX = STANDARD_WARNING_BOX
+
+# Unicode Art Constants - Width-Tiered System
+# Compact Unicode Mode: ≤62 characters
+COMPACT_UNICODE_BANNER = """
  ╔══════════════════════════════════════════════════════╗
  ║                                                      ║
- ║    ██   ██  ███    ██████  ██   ██ ████ ██   ██     ║
- ║    ██   ██ ██ ██   ██   ██ ███  ██  ██  ███  ██     ║
- ║    ██ █ ██ █████   ██████  ████ ██  ██  ████ ██     ║
- ║    ███████ ██  ██  ██  ██  ██ ████  ██  ██ ████     ║
- ║    ███  ██ ██   ██ ██   ██ ██  ███  ██  ██  ███     ║
+ ║   ██   ██  ████   ████  █  █  ████  ████            ║
+ ║   ██   ██ ██  ██ ██  ██ ████  ██    ██  █           ║
+ ║   ███████ ██████ ██     ██ █  ████  ████            ║
+ ║   ██   ██ ██  ██ ██  ██ ████  ██    ██ █            ║
+ ║   ██   ██ ██  ██  ████  █  █  ████  █  █            ║
  ║                                                      ║
- ║                     !!! WARNING !!!                 ║
- ║              UNAUTHORIZED ACCESS DETECTED            ║
- ║            INITIATING SECURITY PROTOCOLS             ║
+ ║   ██████  ████  ████  █   █ ████ █  █ ████ █        ║
+ ║      ██   ██    ██  █ ██ ██  ██  ██ █ ██  ██        ║
+ ║      ██   ████  ████  █████  ██  ████ ████ █        ║
+ ║      ██   ██    ██ █  ██ ██  ██  █ ██ ██ █ █        ║
+ ║      ██   ████  █  █  █   █ ████ █  █ █  █ ████     ║
+ ║                                                      ║
+ ║                 [ VERSION 2.0.7 ]                   ║
+ ║           *** CLASSIFIED ACCESS ONLY ***            ║
  ╚══════════════════════════════════════════════════════╝
 """
 
-# Global Unicode mode setting
+COMPACT_UNICODE_ACCESS_GRANTED = """
+ ╔════════════════════════════════════════════════════╗
+ ║                                                    ║
+ ║    ████   ████  ████  ████  ████  ████            ║
+ ║   ██  ██ ██  ██ ██  ██ ██    ██    ██             ║
+ ║   ██████ ██     ██     ████  ████  ████           ║
+ ║   ██  ██ ██  ██ ██  ██ ██       ██ ██             ║
+ ║   ██  ██  ████   ████  ████  ████  ████           ║
+ ║                                                    ║
+ ║    ████  ████   ████  █  █ ████  ████  ████       ║
+ ║   ██     ██  █ ██  ██ ██ █  ██   ██     ██  █     ║
+ ║   ██ ███ ████  ██████ ████  ██   ████   ██  █     ║
+ ║   ██  ██ ██ █  ██  ██ █ ██  ██   ██     ██  █     ║
+ ║    ████  █  █  ██  ██ █  █  ██   ████   ████      ║
+ ║                                                    ║
+ ║              *** ACCESS GRANTED ***                ║
+ ╚════════════════════════════════════════════════════╝
+"""
+
+COMPACT_UNICODE_WARNING_BOX = """
+ ╔═══════════════════════════════════════════════════╗
+ ║                                                   ║
+ ║   █   █  ████  ████  █  █ ████ █  █  ████       ║
+ ║   █   █ ██  ██ ██  █ ██ █  ██  ██ █ ██          ║
+ ║   █ █ █ ██████ ████  ████  ██  ████ ██ ██       ║
+ ║   █████ ██  ██ ██ █  █ ██  ██  █ ██ ██  █       ║
+ ║   ██ ██ ██  ██ █  █  █  █ ████ █  █  ████       ║
+ ║                                                   ║
+ ║                 !!! WARNING !!!                  ║
+ ║          UNAUTHORIZED ACCESS DETECTED            ║
+ ║        INITIATING SECURITY PROTOCOLS             ║
+ ╚═══════════════════════════════════════════════════╝
+"""
+
+# Standard Unicode Mode: 63-99 characters  
+STANDARD_UNICODE_BANNER = """
+ ╔════════════════════════════════════════════════════════════════════════╗
+ ║                                                                        ║
+ ║  ██   ██   ████   ██████  ██  ██  ████████  ██████                    ║
+ ║  ██   ██  ██  ██  ██      ██ ██   ██        ██   ██                   ║
+ ║  ███████  ██████  ██      ████    ████      ██████                    ║
+ ║  ██   ██  ██  ██  ██      ██ ██   ██        ██  ██                    ║
+ ║  ██   ██  ██  ██  ██████  ██  ██  ████████  ██   ██                   ║
+ ║                                                                        ║
+ ║  ████████  ████████  ██████  ██   ██  ██████  ██   ██   ████   ██     ║
+ ║     ██     ██        ██   ██ ███ ███   ██    ███  ██  ██  ██  ██      ║
+ ║     ██     ████      ██████  ███████   ██    ████ ██  ██████  ██      ║
+ ║     ██     ██        ██  ██  ██ █ ██   ██    ██ ████  ██  ██  ██      ║
+ ║     ██     ████████  ██   ██ ██   ██  ██████ ██  ███  ██   ██ ██████  ║
+ ║                                                                        ║
+ ║                         [ VERSION 2.0.7 ]                             ║
+ ║                   *** CLASSIFIED ACCESS ONLY ***                      ║
+ ╚════════════════════════════════════════════════════════════════════════╝
+"""
+
+STANDARD_UNICODE_ACCESS_GRANTED = """
+ ╔═══════════════════════════════════════════════════════════════════╗
+ ║                                                                   ║
+ ║      ██████   ██████  ██████  ████████ ████████ ████████        ║
+ ║     ██  ██   ██  ██  ██  ██  ██       ██       ██               ║
+ ║    ██   ██  ██      ██      ████     ████████ ████████          ║
+ ║    ███████  ██  ██  ██  ██  ██           ██   ██                ║
+ ║    ██   ██   ██████  ██████  ████████ ████████ ████████         ║
+ ║                                                                   ║
+ ║       ████████ ██████    ████   ██   ██ ████████ ████████  ████  ║
+ ║      ██       ██   ██  ██  ██  ███  ██    ██    ██       ██  ██ ║
+ ║      ██  ████ ██████   ██████  ████ ██    ██    ████     ██  ██ ║
+ ║      ██   ██  ██  ██   ██  ██  ██ ████    ██    ██       ██  ██ ║
+ ║       ███████ ██   ██  ██   ██ ██  ███    ██    ████████  ████  ║
+ ║                                                                   ║
+ ║                      *** ACCESS GRANTED ***                      ║
+ ╚═══════════════════════════════════════════════════════════════════╝
+"""
+
+STANDARD_UNICODE_WARNING_BOX = """
+ ╔══════════════════════════════════════════════════════════════════╗
+ ║                                                                  ║
+ ║    ██   ██   ████   ██████  ██   ██ ████ ██   ██  ████████     ║
+ ║    ██   ██  ██  ██  ██   ██ ███  ██  ██  ███  ██ ██            ║
+ ║    ██ █ ██  ██████  ██████  ████ ██  ██  ████ ██ ██  ████      ║
+ ║    ███████  ██  ██  ██  ██  ██ ████  ██  ██ ████ ██   ██       ║
+ ║    ███  ██  ██  ██  ██   ██ ██  ███ ████ ██  ███  ███████      ║
+ ║                                                                  ║
+ ║                         !!! WARNING !!!                         ║
+ ║                  UNAUTHORIZED ACCESS DETECTED                   ║
+ ║                INITIATING SECURITY PROTOCOLS                    ║
+ ╚══════════════════════════════════════════════════════════════════╝
+"""
+
+# Wide Unicode Mode: ≥100 characters
+WIDE_UNICODE_BANNER = """
+ ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                                                              ║
+ ║  ██   ██   ████████   ██████████  ██    ██  ████████████  ██████████                       ║
+ ║  ██   ██  ██    ██   ██      ██  ██  ██     ██        ██  ██   ██                          ║
+ ║  ██████   ████████   ██        ██ ████      ██████████    ██████                           ║
+ ║  ██   ██  ██    ██   ██      ██  ██  ██     ██            ██  ██                           ║
+ ║  ██   ██  ██    ██    ██████████  ██    ██  ████████████  ██   ██                          ║
+ ║                                                                                              ║
+ ║  ████████████  ████████████  ██████████  ██   ██   ██  ██████████  ██   ██   ████████   ██ ║
+ ║       ██       ██            ██       ██ ███ ███ ███     ██      ███  ██   ██    ██    ██ ║
+ ║       ██       ██████████    ██████████  ██████████      ██      ████ ██   ████████    ██ ║
+ ║       ██       ██            ██     ██   ██  █  ██       ██      ██ ████   ██    ██    ██ ║
+ ║       ██       ████████████  ██      ██  ██     ██     ████████  ██   ███  ██     ██ ██████║
+ ║                                                                                              ║
+ ║                                   [ VERSION 2.0.7 ]                                        ║
+ ║                             *** CLASSIFIED ACCESS ONLY ***                                  ║
+ ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+"""
+
+WIDE_UNICODE_ACCESS_GRANTED = """
+ ╔═════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                                                         ║
+ ║      ████████████   ██████████  ██████████  ████████████ ████████████ ████████████   ║
+ ║     ██      ██     ██    ██    ██    ██    ██           ██           ██               ║
+ ║    ██       ██    ██        ██ ██        ██ ██████████   ████████████ ████████████   ║
+ ║    ████████████   ██    ██    ██    ██    ██           ██            ██              ║
+ ║    ██       ██     ██████████  ██████████  ████████████ ████████████  ████████████   ║
+ ║                                                                                         ║
+ ║       ██████████  ██████████    ████████   ██     ██   ██ ████████████ ████████████   ║
+ ║      ██          ██       ██  ██    ██   ███    ██  ██    ██      ██         ██      ║
+ ║      ██   ██████ ██████████   ████████    ████   ██ ██    ██      ██         ██      ║
+ ║      ██        ██ ██     ██    ██    ██   ██ ██  ████     ██      ██         ██      ║
+ ║       ██████████ ██      ██   ██     ██  ██   ██ ███      ██      ██    ████████████ ║
+ ║                                                                                         ║
+ ║                                *** ACCESS GRANTED ***                                  ║
+ ╚═════════════════════════════════════════════════════════════════════════════════════════╝
+"""
+
+WIDE_UNICODE_WARNING_BOX = """
+ ╔════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                                                        ║
+ ║    ██     ██   ████████   ██████████  ██     ██ ████████ ██     ██  ██████████      ║
+ ║    ██     ██  ██    ██   ██       ██  ██   ██    ██      ██   ██  ██                ║
+ ║    ██  █  ██  ████████   ██████████   ██ ██      ██      ██ ██    ██  ██████        ║
+ ║    ████████   ██    ██   ██     ██    ████       ██      ████     ██       ██       ║
+ ║    ███   ██   ██    ██   ██      ██   ██  ██   ████████  ██  ██    ████████████     ║
+ ║                                                                                        ║
+ ║                                  !!! WARNING !!!                                      ║
+ ║                        UNAUTHORIZED ACCESS DETECTED                                   ║
+ ║                      INITIATING SECURITY PROTOCOLS                                    ║
+ ╚════════════════════════════════════════════════════════════════════════════════════════╝
+"""
+
+# Default Unicode constants (keeping for backward compatibility)
+UNICODE_BANNER = STANDARD_UNICODE_BANNER
+UNICODE_ACCESS_GRANTED = STANDARD_UNICODE_ACCESS_GRANTED
+UNICODE_WARNING_BOX = STANDARD_UNICODE_WARNING_BOX
+
+# Global Unicode mode setting and width system
 unicode_mode = "auto"
+width_mode = "auto"  # Width detection mode: auto, compact, standard, wide
 
 def utf8_env_check():
     """Check if environment variables suggest UTF-8 support"""
@@ -224,16 +458,61 @@ def should_use_unicode():
     return False
 
 def get_banner():
-    """Get appropriate banner based on Unicode mode"""
-    return UNICODE_BANNER if should_use_unicode() else ASCII_BANNER
+    """Get appropriate banner based on Unicode mode and terminal width"""
+    width_tier = get_width_mode()
+    
+    if should_use_unicode():
+        if width_tier == 'compact':
+            return COMPACT_UNICODE_BANNER
+        elif width_tier == 'wide':
+            return WIDE_UNICODE_BANNER
+        else:  # standard
+            return STANDARD_UNICODE_BANNER
+    else:
+        if width_tier == 'compact':
+            return COMPACT_ASCII_BANNER
+        elif width_tier == 'wide':
+            return WIDE_ASCII_BANNER
+        else:  # standard
+            return STANDARD_ASCII_BANNER
 
 def get_access_granted():
-    """Get appropriate access granted box based on Unicode mode"""
-    return UNICODE_ACCESS_GRANTED if should_use_unicode() else ACCESS_GRANTED
+    """Get appropriate access granted box based on Unicode mode and terminal width"""
+    width_tier = get_width_mode()
+    
+    if should_use_unicode():
+        if width_tier == 'compact':
+            return COMPACT_UNICODE_ACCESS_GRANTED
+        elif width_tier == 'wide':
+            return WIDE_UNICODE_ACCESS_GRANTED
+        else:  # standard
+            return STANDARD_UNICODE_ACCESS_GRANTED
+    else:
+        if width_tier == 'compact':
+            return COMPACT_ACCESS_GRANTED
+        elif width_tier == 'wide':
+            return WIDE_ACCESS_GRANTED
+        else:  # standard
+            return STANDARD_ACCESS_GRANTED
 
 def get_warning_box():
-    """Get appropriate warning box based on Unicode mode"""
-    return UNICODE_WARNING_BOX if should_use_unicode() else WARNING_BOX
+    """Get appropriate warning box based on Unicode mode and terminal width"""
+    width_tier = get_width_mode()
+    
+    if should_use_unicode():
+        if width_tier == 'compact':
+            return COMPACT_UNICODE_WARNING_BOX
+        elif width_tier == 'wide':
+            return WIDE_UNICODE_WARNING_BOX
+        else:  # standard
+            return STANDARD_UNICODE_WARNING_BOX
+    else:
+        if width_tier == 'compact':
+            return COMPACT_WARNING_BOX
+        elif width_tier == 'wide':
+            return WIDE_WARNING_BOX
+        else:  # standard
+            return STANDARD_WARNING_BOX
 
 def get_progress_chars():
     """Get appropriate progress bar characters based on Unicode mode"""
@@ -241,6 +520,88 @@ def get_progress_chars():
         return {'filled': '█', 'empty': '░'}
     else:
         return {'filled': '#', 'empty': '.'}
+
+
+def get_terminal_width():
+    """
+    Get terminal width with comprehensive fallback chain.
+    
+    Returns:
+        int: Terminal width in characters
+    """
+    # Primary: shutil.get_terminal_size() with proper error handling
+    try:
+        size = shutil.get_terminal_size()
+        if size.columns > 0:
+            return size.columns
+    except (OSError, AttributeError):
+        pass
+    
+    # Fallback 1: COLUMNS environment variable
+    columns_env = os.environ.get('COLUMNS')
+    if columns_env and columns_env.isdigit():
+        columns = int(columns_env)
+        if columns > 0:
+            return columns
+    
+    # Fallback 2: TERM_COLS environment variable
+    term_cols_env = os.environ.get('TERM_COLS')
+    if term_cols_env and term_cols_env.isdigit():
+        term_cols = int(term_cols_env)
+        if term_cols > 0:
+            return term_cols
+    
+    # Final fallback: Default to 80 columns
+    return 80
+
+
+def classify_width(width):
+    """Classify terminal width into compact, standard, or wide tiers
+    
+    Args:
+        width (int): Terminal width in characters
+        
+    Returns:
+        str: Width tier - 'compact', 'standard', or 'wide'
+    """
+    if width <= 62:
+        return 'compact'
+    elif width <= 99:
+        return 'standard'
+    else:
+        return 'wide'
+
+
+def get_terminal_width_tier():
+    """
+    Get terminal width tier with edge case handling.
+    
+    Returns:
+        str: Width tier - 'compact', 'standard', or 'wide'
+    """
+    # Handle non-interactive terminals (pipes, redirected output)
+    if not sys.stdout.isatty():
+        # Default to standard for non-interactive output
+        return 'standard'
+    
+    # Get terminal width with fallback chain
+    width = get_terminal_width()
+    return classify_width(width)
+
+
+def get_width_mode():
+    """Determine current width mode based on settings and terminal"""
+    global width_mode
+    
+    if width_mode in ['compact', 'standard', 'wide']:
+        # Explicit mode set via CLI argument
+        return width_mode
+    elif width_mode == 'auto':
+        # Auto-detect based on terminal width
+        return get_terminal_width_tier()
+    else:
+        # Fallback to standard for unknown modes
+        return 'standard'
 
 
 def progress(label="Processing", steps=20, delay=0.08):
@@ -551,7 +912,7 @@ def interactive_mode():
 
 def main():
     """Main entry point"""
-    global unicode_mode
+    global unicode_mode, width_mode
     
     parser = argparse.ArgumentParser(
         description="Master Hacker Terminal v2.0"
@@ -568,6 +929,12 @@ def main():
         help="Unicode art mode: auto (detect), on (force), off (ASCII only)"
     )
     parser.add_argument(
+        "--width",
+        choices=["auto", "compact", "standard", "wide"],
+        default="auto",
+        help="Terminal width mode: auto (detect), compact (≤62 chars), standard (63-99 chars), wide (≥100 chars)"
+    )
+    parser.add_argument(
         "--interactive",
         action="store_true",
         help="Enter interactive mode"
@@ -580,8 +947,9 @@ def main():
     
     args = parser.parse_args()
     
-    # Set global Unicode mode
+    # Set global Unicode and width modes
     unicode_mode = args.unicode
+    width_mode = args.width
     
     try:
         if args.script == "demo":

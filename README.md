@@ -19,36 +19,45 @@ python masterhacker.py
 # Interactive mode
 python masterhacker.py --interactive
 
-# Force ASCII mode
-python masterhacker.py --unicode off --script demo
+# Force specific terminal width
+python masterhacker.py --width 80 --script demo
 ```
+
+## Adaptive Width System
+
+The terminal automatically adapts to your screen with three rendering modes:
+
+- **Compact** (≤62 chars): Minimal ASCII art for narrow terminals
+- **Standard** (63-99 chars): Balanced layout with moderate detail
+- **Wide** (≥100 chars): Full cinematic experience with professional letterforms
+
+Width is auto-detected or can be manually set with `--width N`.
 
 ## Examples
 
 ```bash
-# Auto-detect Unicode support (default)
-python masterhacker.py --unicode auto
+# Auto-detect terminal width and Unicode support
+python masterhacker.py --script demo
 
-# Force Unicode box-drawing characters
-python masterhacker.py --unicode on --script demo
+# Force specific width for testing
+python masterhacker.py --width 50 --unicode off
 
-# ASCII-only mode for compatibility
-python masterhacker.py --unicode off
+# Wide terminal with Unicode
+python masterhacker.py --width 120 --unicode on
 
 # Single command execution
 python masterhacker.py scan
 python masterhacker.py infiltrate MAINFRAME-7
 ```
 
-## Unicode Mode
+## CLI Arguments
 
-The `--unicode` flag controls terminal art rendering:
-
-- **`auto`** (default): Detect Unicode support automatically
-- **`on`**: Force Unicode box-drawing characters (╔══╗ style)
-- **`off`**: Use ASCII-only characters (+--+ style)
-
-Auto-detection checks environment variables and terminal type for safe Unicode support.
+| Argument | Description |
+|----------|-------------|
+| `--script demo` | Run deterministic demo sequence |
+| `--interactive` | Start interactive session |
+| `--unicode auto\|on\|off` | Control Unicode rendering |
+| `--width N` | Set terminal width (auto-detected if omitted) |
 
 ## Commands
 
@@ -65,43 +74,39 @@ Auto-detection checks environment variables and terminal type for safe Unicode s
 | `clear` | Clear terminal screen |
 | `exit` | Exit terminal |
 
+## Visual Modes
+
+**Compact Width (≤62 chars)**:
+```
++=======================+
+|   *** SCANNING ***    |
++=======================+
+Progress: [###...] 50%
+```
+
+**Wide Width (≥100 chars)**:
+```
+╔═══════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                    *** NETWORK INFILTRATION COMPLETE ***                            ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════════╝
+Progress: [████████████████████████████████████████████████████████████████████████████████████████] 100%
+```
+
 ## Demo Mode
 
 ```bash
 python masterhacker.py --script demo
 ```
 
-Runs a deterministic demonstration sequence:
-- Always produces identical output (seeded random generation)
-- Showcases all major features and terminal art
-- Sequence: scan → infiltrate → hack → trace → countertrace → status → exit
-- Perfect for screenshots and presentations
-
-## ASCII vs Unicode Modes
-
-**ASCII Mode** (`--unicode off`):
-```
-+============================================+
-|        *** ACCESS GRANTED ***             |
-+============================================+
-Progress: [######....] 60%
-```
-
-**Unicode Mode** (`--unicode on`):
-```
-╔════════════════════════════════════════════╗
-║        *** ACCESS GRANTED ***             ║
-╚════════════════════════════════════════════╝
-Progress: [██████░░░░] 60%
-```
+Runs a deterministic demonstration sequence with consistent output across all terminal sizes.
 
 ## Technical Notes
 
-- **Single file implementation** - Everything in `masterhacker.py`
+- **Adaptive rendering** - Professional letterforms scale with terminal width
 - **Zero dependencies** - Uses only Python standard library  
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **Deterministic demo** - Consistent output for reliable demonstrations
-- **Auto Unicode detection** - Safe terminal capability probing
+- **Auto-detection** - Terminal width and Unicode capability probing
 - **For laughs only** - No actual hacking capabilities included
 
 ## License
