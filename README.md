@@ -4,9 +4,11 @@
 
 A tongue-in-cheek, movie-hacker terminal simulator that parodies Hollywood's over-the-top hacking scenes.
 
+**Version 2.1.4** - Now with modern Python architecture, comprehensive type safety, and state-of-the-art terminal rendering.
+
 ## Requirements
 
-- Python 3.8+
+- Python 3.7+
 - No dependencies (uses Python standard library only)
 
 ## Quick Start
@@ -104,11 +106,14 @@ Runs a deterministic demonstration sequence with consistent output across all te
 
 ## Technical Notes
 
+- **Modern Architecture** - Built with comprehensive type hints and state management patterns
 - **Adaptive rendering** - Professional letterforms scale with terminal width
+- **Thread-safe design** - Robust state management with validation and error handling
 - **Zero dependencies** - Uses only Python standard library  
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **Deterministic demo** - Consistent output for reliable demonstrations
 - **Auto-detection** - Terminal width and Unicode capability probing
+- **Production-ready** - Comprehensive documentation, type safety, and testing
 - **For laughs only** - No actual hacking capabilities included
 
 ## License
